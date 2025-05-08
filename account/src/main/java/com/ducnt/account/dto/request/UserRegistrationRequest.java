@@ -1,9 +1,6 @@
 package com.ducnt.account.dto.request;
 
 import com.ducnt.account.validation.AccountConstraint;
-import com.ducnt.account.validation.DobConstraint;
-import com.ducnt.account.validation.PasswordConstraint;
-import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

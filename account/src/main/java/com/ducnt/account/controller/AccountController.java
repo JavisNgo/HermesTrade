@@ -1,7 +1,6 @@
 package com.ducnt.account.controller;
 
 import com.ducnt.account.dto.request.UserRegistrationRequest;
-import com.ducnt.account.dto.response.ApiResponse;
 import com.ducnt.account.dto.response.UserCreationResponse;
 import com.ducnt.account.service.IAccountService;
 import jakarta.validation.Valid;

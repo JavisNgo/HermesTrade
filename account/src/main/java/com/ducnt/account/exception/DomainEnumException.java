@@ -1,13 +1,11 @@
 package com.ducnt.account.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 @NoArgsConstructor
 @Getter
-public enum ErrorResponse {
+public enum DomainEnumException {
 
     EMAIL_INVALID("Email is invalid", "001"),
     PASSWORD_LENGTH_INVALID("Password Length Should Be At Least 8 Characters","002"),
@@ -23,7 +21,7 @@ public enum ErrorResponse {
     private String message;
     private String errorCode;
 
-    ErrorResponse(String message, String errorCode) {
+    DomainEnumException(String message, String errorCode) {
         this.message = message;
         this.errorCode = SERVICE_IDENTIFIER + errorCode;
     }

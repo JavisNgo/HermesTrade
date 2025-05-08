@@ -3,7 +3,7 @@ package com.ducnt.account.service;
 import com.ducnt.account.dto.request.UserRegistrationRequest;
 import com.ducnt.account.dto.response.UserCreationResponse;
 import com.ducnt.account.exception.DomainException;
-import com.ducnt.account.exception.ErrorResponse;
+import com.ducnt.account.exception.DomainEnumException;
 import com.ducnt.account.model.Account;
 import com.ducnt.account.repository.UserRepository;
 import lombok.AccessLevel;
@@ -26,11 +26,11 @@ public class AccountService implements IAccountService {
     public UserCreationResponse activateUser(UserRegistrationRequest request) {
         Optional<Account> user = userRepository.findByEmail(request.getEmail());
         if (user.isPresent()) {
-            throw new DomainException(ErrorResponse.EMAIL_INVALID);
+            throw new DomainException(DomainEnumException.EMAIL_ALREADY_EXISTS);
         }
         Account account = Account.fromUserRequest(request);
         account.onUpdatePassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(account);
-        return UserCreationResponse.builder().build();
+        return UserCreationResponse.fromAccount(account);
     }
 }
