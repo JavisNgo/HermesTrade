@@ -1,5 +1,6 @@
 package com.ducnt.account.dto.request;
 
+import com.ducnt.account.validation.AccountConstraint;
 import com.ducnt.account.validation.DobConstraint;
 import com.ducnt.account.validation.PasswordConstraint;
 import jakarta.validation.constraints.Email;
@@ -15,13 +16,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@AccountConstraint
 public class UserRegistrationRequest {
-    @Email(message = "Email must be a well-formed email address")
     String email;
-    @PasswordConstraint
     String password;
     String fullName;
-    @DobConstraint(min = 18)
     LocalDate birthDate;
     String address;
 }

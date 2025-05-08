@@ -1,7 +1,8 @@
 package com.ducnt.account.service;
 
 import com.ducnt.account.dto.request.UserRegistrationRequest;
+import com.ducnt.account.dto.response.UserCreationResponse;
 
 public interface IAccountService {
-    void activateUser(UserRegistrationRequest request);
+    UserCreationResponse activateUser(UserRegistrationRequest request);
 }

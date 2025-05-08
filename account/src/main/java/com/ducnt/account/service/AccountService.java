@@ -1,6 +1,7 @@
 package com.ducnt.account.service;
 
 import com.ducnt.account.dto.request.UserRegistrationRequest;
+import com.ducnt.account.dto.response.UserCreationResponse;
 import com.ducnt.account.exception.DomainException;
 import com.ducnt.account.exception.ErrorResponse;
 import com.ducnt.account.model.Account;
@@ -22,13 +23,14 @@ public class AccountService implements IAccountService {
     PasswordEncoder passwordEncoder;
 
     @Override
-    public void activateUser(UserRegistrationRequest request) {
+    public UserCreationResponse activateUser(UserRegistrationRequest request) {
         Optional<Account> user = userRepository.findByEmail(request.getEmail());
         if (user.isPresent()) {
-            throw new DomainException(ErrorResponse.ACCOUNT_INVALID);
+            throw new DomainException(ErrorResponse.EMAIL_INVALID);
         }
         Account account = Account.fromUserRequest(request);
         account.onUpdatePassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(account);
+        return UserCreationResponse.builder().build();
     }
 }
