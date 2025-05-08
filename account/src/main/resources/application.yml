@@ -2,9 +2,9 @@ server:
   port: 8080
 spring:
   application:
-    name: activation
+    name: account
   datasource:
-    url: jdbc:postgresql://localhost:5432/activation
+    url: jdbc:postgresql://localhost:5432/account
     driver-class-name: org.postgresql.Driver
     username: root
     password: 12345

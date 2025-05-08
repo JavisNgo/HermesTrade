@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 @NoArgsConstructor
 @Getter
 public enum ErrorResponse {
-    USERNAME_EXISTS("Email already exists ", HttpStatus.CONFLICT),
+    ACCOUNT_INVALID("Account is invalid", HttpStatus.BAD_REQUEST),
 
     BAD_REQUEST("Invalid request", HttpStatus.BAD_REQUEST),
     ;

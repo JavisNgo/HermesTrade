@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
@@ -15,12 +14,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 @RestControllerAdvice
-public class CustomExceptionHandler {
+public class ExceptionHandler {
 
     private static final String MIN_ATTRIBUTE = "min";
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ApiResponse> handleCustomException(CustomException e) {
+    @org.springframework.web.bind.annotation.ExceptionHandler(DomainException.class)
+    public ResponseEntity<ApiResponse> handleCustomException(DomainException e) {
         ErrorResponse errorResponse = e.getErrorResponse();
         var response = ResponseEntity.status(errorResponse.getStatus());
         return response.body(
@@ -32,7 +31,7 @@ public class CustomExceptionHandler {
         );
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @org.springframework.web.bind.annotation.ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse> handleMethodArgumentConversionNotSupportedException(MethodArgumentNotValidException e) {
         ErrorResponse errorResponse = ErrorResponse.BAD_REQUEST;
 
@@ -54,6 +53,7 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(errorResponse.getStatus())
                 .body(ApiResponse
                         .builder()
+                        .code(errorResponse.getStatus().value())
                         .message(Objects.nonNull(attributes) ? attributes(errorResponse.getMessage(), attributes)
                                 : Objects.requireNonNull(e.getFieldError()).getDefaultMessage())
                         .build());
@@ -65,8 +65,8 @@ public class CustomExceptionHandler {
         return message.replace("{" + MIN_ATTRIBUTE + "}", minValue);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse> handleException(CustomException e) {
+    @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse> handleException(DomainException e) {
         var response = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR);
         return response.body(
                 ApiResponse

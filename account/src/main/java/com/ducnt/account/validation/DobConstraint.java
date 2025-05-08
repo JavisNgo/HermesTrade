@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
         validatedBy = {DobValidator.class}
 )
 public @interface DobConstraint {
-    String message() default "Invalid date of birth";
+    String message() default "Customer's age does not match";
 
     int min() default 0;
 
