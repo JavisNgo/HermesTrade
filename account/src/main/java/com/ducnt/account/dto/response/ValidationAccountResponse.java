@@ -2,10 +2,7 @@ package com.ducnt.account.dto.response;
 
 import com.ducnt.account.enums.AccountStatus;
 import com.ducnt.account.model.Account;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.UUID;
@@ -14,6 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
+@Data
 public class ValidationAccountResponse {
     UUID clientId;
     boolean status;
