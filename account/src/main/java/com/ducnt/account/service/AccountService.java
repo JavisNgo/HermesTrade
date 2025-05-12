@@ -49,9 +49,7 @@ public class AccountService implements IAccountService {
         Account account = accountRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new DomainException(DomainEnumException.EMAIL_INVALID));
 
-        String requestPassword = passwordEncoder.encode(request.getPassword());
-
-        if (!requestPassword.equals(account.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
             throw new DomainException(DomainEnumException.PASSWORD_INCORRECT);
         }
 
