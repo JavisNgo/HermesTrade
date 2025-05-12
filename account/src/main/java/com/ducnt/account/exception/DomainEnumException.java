@@ -14,6 +14,7 @@ public enum DomainEnumException {
     AGE_MUST_BE_AT_LEAST("Age Must Be At Least 18","005"),
     ADDRESS_IS_REQUIRED("Address Is Required","006"),
     EMAIL_ALREADY_EXISTS("Email Already Exists", "007"),
+    PASSWORD_INCORRECT("Password Incorrect", "008"),
     ;
 
     private final String SERVICE_IDENTIFIER = "0601";

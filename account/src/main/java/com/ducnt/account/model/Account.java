@@ -36,6 +36,7 @@ public class Account {
         return Account.builder()
                 .email(request.getEmail())
                 .address(request.getAddress())
+                .clientId(UUID.randomUUID())
                 .fullName(request.getFullName())
                 .birthDate(request.getBirthDate())
                 .status(AccountStatus.ACTIVE)
