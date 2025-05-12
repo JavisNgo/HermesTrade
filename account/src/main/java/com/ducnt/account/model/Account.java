@@ -22,6 +22,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
+    UUID clientId;
     String email;
     String password;
     String fullName;

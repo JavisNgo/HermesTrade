@@ -1,4 +1,4 @@
-package com.ducnt.authentication.model;
+package com.ducnt.account.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,16 +9,14 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.UUID;
 
-@Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class Account {
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+public class AccountBalance {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
-    String email;
-    String password;
 }
