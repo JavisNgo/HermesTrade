@@ -1,7 +1,9 @@
 package com.ducnt.account.controller;
 
+import com.ducnt.account.dto.request.LoginRequest;
 import com.ducnt.account.dto.request.UserRegistrationRequest;
 import com.ducnt.account.dto.response.UserCreationResponse;
+import com.ducnt.account.dto.response.ValidationAccountResponse;
 import com.ducnt.account.service.IAccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -25,5 +27,11 @@ public class AccountController {
     public ResponseEntity<UserCreationResponse> activeAccount(@RequestBody @Valid UserRegistrationRequest request) {
         UserCreationResponse userCreationResponse = activationService.activateUser(request);
         return new ResponseEntity<>(userCreationResponse, HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<ValidationAccountResponse> validateAccount(@RequestBody LoginRequest request) {
+        ValidationAccountResponse validationAccountResponse = activationService.validateAccount(request);
+        return new ResponseEntity<>(validationAccountResponse, HttpStatus.OK);
     }
 }
