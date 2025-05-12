@@ -3,17 +3,8 @@ server:
 spring:
   application:
     name: authentication
-  datasource:
-    url: jdbc:postgresql://localhost:5432/authentication
-    driver-class-name: org.postgresql.Driver
-    username: root
-    password: 12345
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
-    hibernate:
-      ddl-auto: create-drop
-    defer-datasource-initialization: true
-  sql:
-    init:
-      mode: always
+  cloud:
+    aws:
+      dynamodb:
+        region: us-east-1
+        endpoint: http://localshost:4566
