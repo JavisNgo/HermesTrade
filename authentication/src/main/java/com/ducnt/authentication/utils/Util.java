@@ -1,4 +1,4 @@
-package utils;
+package com.ducnt.authentication.utils;
 
 import lombok.experimental.UtilityClass;
 

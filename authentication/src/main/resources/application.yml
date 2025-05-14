@@ -8,6 +8,11 @@ spring:
       dynamodb:
         region: us-east-1
         endpoint: http://localshost:4566
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 clients:
   account:
     url: http://localhost:8080

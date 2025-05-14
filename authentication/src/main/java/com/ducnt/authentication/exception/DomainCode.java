@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 public enum DomainCode {
 
     ACCOUNT_INCORRECT("Account Incorrect", "001"),
+    EMAIL_INCORRECT("Email Incorrect", "002"),
+    RATE_LIMIT_EXCEEDED("Too many login attempts. Please try again later.", "003"),
     ;
 
     private final String SERVICE_IDENTIFIER = "0602";
