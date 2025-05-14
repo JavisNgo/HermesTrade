@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Getter
-public enum DomainEnumException {
+public enum DomainCode {
 
     EMAIL_INVALID("Email is invalid", "001"),
     PASSWORD_LENGTH_INVALID("Password Length Should Be At Least 8 Characters","002"),
@@ -22,7 +22,7 @@ public enum DomainEnumException {
     private String message;
     private String errorCode;
 
-    DomainEnumException(String message, String errorCode) {
+    DomainCode(String message, String errorCode) {
         this.message = message;
         this.errorCode = SERVICE_IDENTIFIER + errorCode;
     }

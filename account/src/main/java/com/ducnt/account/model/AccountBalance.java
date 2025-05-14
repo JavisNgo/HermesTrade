@@ -1,5 +1,6 @@
 package com.ducnt.account.model;
 
+import com.ducnt.account.enums.Currency;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,10 +31,11 @@ public class AccountBalance {
 
     public static AccountBalance onCreateAccountBalanceDefault(UUID clientId) {
         return AccountBalance.builder()
+                .clientId(clientId)
                 .availableBalance(0)
                 .actualBalance(0)
                 .reversedDebitAmount(0)
-                .currency("USD")
+                .currency(Currency.USD.name())
                 .createdDate(LocalDate.now())
                 .build();
     }

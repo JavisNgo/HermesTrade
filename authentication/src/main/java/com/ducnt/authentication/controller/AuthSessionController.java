@@ -17,13 +17,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthSessionController {
     AuthSessionService authSessionService;
 
-    @PostMapping("/login")
-    public ResponseEntity<ValidationAccountResponse> login(
-            @RequestBody LoginRequest loginRequest,
-            @RequestHeader(name = "Session-Id", required = false, defaultValue = "unknown") String sessionId,
-            @RequestHeader(name = "Client-Id", required = false, defaultValue = "unknown") String clientId
-    ) {
-        ValidationAccountResponse response = authSessionService.login(loginRequest, sessionId, clientId);
+    @PostMapping("/authenticate")
+    public ResponseEntity<ValidationAccountResponse> login(@RequestBody LoginRequest loginRequest) {
+        ValidationAccountResponse response = authSessionService.authenticate(loginRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

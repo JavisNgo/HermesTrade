@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Getter
-public enum DomainEnumException {
+public enum DomainCode {
 
     ACCOUNT_INCORRECT("Account Incorrect", "001"),
     ;
@@ -15,7 +15,7 @@ public enum DomainEnumException {
     private String message;
     private String errorCode;
 
-    DomainEnumException(String message, String errorCode) {
+    DomainCode(String message, String errorCode) {
         this.message = message;
         this.errorCode = SERVICE_IDENTIFIER + errorCode;
     }

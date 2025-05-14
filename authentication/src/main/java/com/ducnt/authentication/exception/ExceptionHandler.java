@@ -10,7 +10,7 @@ public class ExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> handleDomainException(DomainException e) {
-        ErrorResponse errorResponse = ErrorResponse.fromDomainEnumResponse(e.getDomainEnumException());
+        ErrorResponse errorResponse = ErrorResponse.fromDomainEnumResponse(e.getDomainCode());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errorResponse);

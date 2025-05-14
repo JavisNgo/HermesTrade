@@ -1,9 +1,8 @@
 package com.ducnt.account.controller;
 
-import com.ducnt.account.dto.request.UserRegistrationRequest;
-import com.ducnt.account.dto.response.UserCreationResponse;
+import com.ducnt.account.dto.request.LoginRequest;
+import com.ducnt.account.dto.response.ValidationAccountResponse;
 import com.ducnt.account.service.IAccountService;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,13 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RestController
 @RequestMapping("/api/v1")
-public class AccountController {
+public class InternalAccountController {
     IAccountService activationService;
 
-    @PostMapping("/active")
-    public ResponseEntity<UserCreationResponse> activeAccount(@RequestBody @Valid UserRegistrationRequest request) {
-        UserCreationResponse userCreationResponse = activationService.activateUser(request);
-        return new ResponseEntity<>(userCreationResponse, HttpStatus.ACCEPTED);
+    @PostMapping("/internal/validate")
+    public ResponseEntity<ValidationAccountResponse> validateAccount(@RequestBody LoginRequest request) {
+        ValidationAccountResponse validationAccountResponse = activationService.validateAccount(request);
+        return new ResponseEntity<>(validationAccountResponse, HttpStatus.OK);
     }
-
 }

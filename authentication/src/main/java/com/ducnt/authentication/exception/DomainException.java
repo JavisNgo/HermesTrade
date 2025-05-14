@@ -9,9 +9,9 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DomainException extends RuntimeException {
-    DomainEnumException domainEnumException;
-    public DomainException(DomainEnumException domainEnumException) {
-        super(domainEnumException.getMessage());
-        this.domainEnumException = domainEnumException;
+    DomainCode domainCode;
+    public DomainException(DomainCode domainCode) {
+        super(domainCode.getMessage());
+        this.domainCode = domainCode;
     }
 }

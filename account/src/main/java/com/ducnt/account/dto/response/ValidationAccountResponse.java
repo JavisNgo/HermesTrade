@@ -14,12 +14,12 @@ import java.util.UUID;
 @Data
 public class ValidationAccountResponse {
     UUID clientId;
-    boolean status;
+    AccountStatus status;
 
     public static ValidationAccountResponse formAccount(Account account) {
         return ValidationAccountResponse.builder()
                 .clientId(account.getClientId())
-                .status(account.getStatus() == AccountStatus.ACTIVE)
+                .status(account.getStatus())
                 .build();
     }
 }

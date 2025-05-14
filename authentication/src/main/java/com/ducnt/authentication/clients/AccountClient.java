@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "account", url = "${clients.account.url}")
 public interface AccountClient {
-    @PostMapping("/api/v1/validate")
+    @PostMapping("/api/v1/internal/validate")
     ResponseEntity<ValidationAccountResponse> validateAccount(@RequestBody LoginRequest request);
 }

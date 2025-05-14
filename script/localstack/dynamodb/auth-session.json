@@ -4,6 +4,10 @@
     {
       "AttributeName": "sessionId",
       "AttributeType": "S"
+    },
+    {
+      "AttributeName": "clientId",
+      "AttributeType": "S"
     }
   ],
   "KeySchema": [
@@ -15,5 +19,24 @@
   "ProvisionedThroughput": {
     "ReadCapacityUnits": 5,
     "WriteCapacityUnits": 5
-  }
+  },
+
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "ClientIdIndex",
+      "KeySchema": [
+        {
+          "AttributeName": "clientId",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  ]
 }

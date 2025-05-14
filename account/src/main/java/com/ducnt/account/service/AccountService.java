@@ -5,7 +5,7 @@ import com.ducnt.account.dto.request.UserRegistrationRequest;
 import com.ducnt.account.dto.response.UserCreationResponse;
 import com.ducnt.account.dto.response.ValidationAccountResponse;
 import com.ducnt.account.exception.DomainException;
-import com.ducnt.account.exception.DomainEnumException;
+import com.ducnt.account.exception.DomainCode;
 import com.ducnt.account.model.Account;
 import com.ducnt.account.model.AccountBalance;
 import com.ducnt.account.repository.AccountBalanceRepository;
@@ -31,7 +31,7 @@ public class AccountService implements IAccountService {
     public UserCreationResponse activateUser(UserRegistrationRequest request) {
         Optional<Account> user = accountRepository.findByEmail(request.getEmail());
         if (user.isPresent()) {
-            throw new DomainException(DomainEnumException.EMAIL_ALREADY_EXISTS);
+            throw new DomainException(DomainCode.EMAIL_ALREADY_EXISTS);
         }
         Account account = Account.fromUserRequest(request);
         account.onUpdatePassword(passwordEncoder.encode(request.getPassword()));
@@ -47,10 +47,10 @@ public class AccountService implements IAccountService {
     @Override
     public ValidationAccountResponse validateAccount(LoginRequest request) {
         Account account = accountRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new DomainException(DomainEnumException.EMAIL_INVALID));
+                .orElseThrow(() -> new DomainException(DomainCode.EMAIL_INVALID));
 
         if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
-            throw new DomainException(DomainEnumException.PASSWORD_INCORRECT);
+            throw new DomainException(DomainCode.PASSWORD_INCORRECT);
         }
 
         return ValidationAccountResponse.formAccount(account);

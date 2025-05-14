@@ -2,7 +2,7 @@ package com.ducnt.account.validation;
 
 import com.ducnt.account.dto.request.UserRegistrationRequest;
 import com.ducnt.account.exception.DomainException;
-import com.ducnt.account.exception.DomainEnumException;
+import com.ducnt.account.exception.DomainCode;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.logging.log4j.util.Strings;
@@ -26,22 +26,22 @@ public class AccountValidator implements ConstraintValidator<AccountConstraint, 
     @Override
     public boolean isValid(UserRegistrationRequest userRegistrationRequest, ConstraintValidatorContext context) {
         if(Strings.isEmpty(userRegistrationRequest.getAddress()))
-            throw new DomainException(DomainEnumException.ADDRESS_IS_REQUIRED);
+            throw new DomainException(DomainCode.ADDRESS_IS_REQUIRED);
 
         if(Strings.isEmpty(userRegistrationRequest.getFullName()))
-            throw new DomainException(DomainEnumException.FULL_NAME_IS_REQUIRED);
+            throw new DomainException(DomainCode.FULL_NAME_IS_REQUIRED);
 
         if(validateDob(userRegistrationRequest.getBirthDate())) {
-            throw new DomainException(DomainEnumException.AGE_MUST_BE_AT_LEAST);
+            throw new DomainException(DomainCode.AGE_MUST_BE_AT_LEAST);
         }
         if(validatePasswordLength(userRegistrationRequest.getPassword()))
-            throw new DomainException(DomainEnumException.PASSWORD_LENGTH_INVALID);
+            throw new DomainException(DomainCode.PASSWORD_LENGTH_INVALID);
 
         if(!validatePasswordPattern(userRegistrationRequest.getPassword()))
-            throw new DomainException(DomainEnumException.WEAK_PASSWORD);
+            throw new DomainException(DomainCode.WEAK_PASSWORD);
 
         if(!validateEmail(userRegistrationRequest.getEmail()))
-            throw new DomainException(DomainEnumException.EMAIL_INVALID);
+            throw new DomainException(DomainCode.EMAIL_INVALID);
 
         return true;
     }
