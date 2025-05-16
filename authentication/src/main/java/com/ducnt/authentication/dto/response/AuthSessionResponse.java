@@ -13,13 +13,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ValidationAccountResponse {
+public class AuthSessionResponse {
     UUID clientId;
     UUID sessionId;
     AccountStatus status;
 
-    public static ValidationAccountResponse fromItem(Map<String, AttributeValue> items) {
-        return ValidationAccountResponse.builder()
+    public static AuthSessionResponse fromItem(Map<String, AttributeValue> items) {
+        return AuthSessionResponse.builder()
                 .clientId(UUID.fromString(items.get("clientId").s()))
                 .sessionId(UUID.fromString(items.get("sessionId").s()))
                 .status(AccountStatus.ACTIVE)

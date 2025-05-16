@@ -2,12 +2,15 @@ package com.ducnt.authentication.service;
 
 import com.ducnt.authentication.clients.AccountClient;
 import com.ducnt.authentication.dto.request.LoginRequest;
-import com.ducnt.authentication.dto.response.ValidationAccountResponse;
+import com.ducnt.authentication.dto.response.AuthSessionResponse;
+import com.ducnt.authentication.enums.AccountStatus;
 import com.ducnt.authentication.exception.DomainCode;
 import com.ducnt.authentication.exception.DomainException;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -25,28 +28,36 @@ public class AuthSessionService {
 
     static long SESSION_TTL_SECONDS = 1800L;
 
-    public ValidationAccountResponse authenticate(LoginRequest loginRequest) {
-        ResponseEntity<ValidationAccountResponse> accountResponse = accountClient
-                .validateAccount(loginRequest);
-        ValidationAccountResponse validationAccountResponse = accountResponse.getBody();
-
-        if(validationAccountResponse == null) {
-            throw new DomainException(DomainCode.ACCOUNT_INCORRECT);
+    public AuthSessionResponse authenticate(LoginRequest loginRequest) {
+        ResponseEntity<AuthSessionResponse> accountResponse = null;
+        try {
+            accountResponse = accountClient.validateAccount(loginRequest);
+        } catch (FeignException.FeignClientException e) {
+            if (e.status() == HttpStatus.BAD_REQUEST.value()) {
+                throw new DomainException(DomainCode.ACCOUNT_INCORRECT);
+            } else if (e.status() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+                throw new DomainException(DomainCode.SERVICE_UNAVAILABLE);
+            }
         }
 
-        String clientId = String.valueOf(validationAccountResponse.getClientId());
+        assert accountResponse != null;
+        AuthSessionResponse authSessionResponse = accountResponse.getBody();
 
-        List<Map<String, AttributeValue>> authSession = getAuthSession(clientId);
+        assert authSessionResponse != null;
+        String clientId = String.valueOf(authSessionResponse.getClientId());
 
-        if(!authSession.isEmpty()) {
-            return ValidationAccountResponse.fromItem(authSession.get(0));
-        }else {
-            Map<String, AttributeValue> createAuthSession = createAuthSession(clientId);
-            return ValidationAccountResponse.fromItem(createAuthSession);
+        try {
+            Map<String, AttributeValue> authSession = createAuthSession(clientId);
+            return AuthSessionResponse.fromItem(authSession);
+        } catch (ConditionalCheckFailedException e) {
+            Map<String, AttributeValue> authSession = getAuthSession(clientId);
+            String status = authSession.get("status").s();
+            if (!status.equalsIgnoreCase(AccountStatus.ACTIVE.toString())) {
+                throw new DomainException(DomainCode.ACCOUNT_INCORRECT);
+            }
+            return AuthSessionResponse.fromItem(authSession);
         }
     }
-
-
 
     public Map<String, AttributeValue> createAuthSession(String clientId) {
 
@@ -60,31 +71,53 @@ public class AuthSessionService {
 
         items.put("clientId", AttributeValue.builder().s(clientId).build());
 
+        items.put("status", AttributeValue.builder().s(String.valueOf(AccountStatus.ACTIVE)).build());
+
         PutItemRequest putItemRequest = PutItemRequest
                 .builder()
                 .tableName("auth_session")
+                .conditionExpression("attribute_not_exists(clientId) AND attribute_not_exists(sessionId)")
                 .item(items)
                 .build();
         dynamoDbClient.putItem(putItemRequest);
         return items;
     }
 
-    public List<Map<String,AttributeValue>> getAuthSession(String clientId) {
-        Map<String, String> expressionAttributeNames = new HashMap<>();
-        expressionAttributeNames.put("#clientId", "clientId");
+    public Map<String,AttributeValue> getAuthSession(String clientId) {
+        HashMap<String, AttributeValue> keyToGet = new HashMap<>();
 
-        Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
-        expressionAttributeValues.put(":clientId", AttributeValue.builder().s(clientId).build());
+        keyToGet.put("clientId", AttributeValue.builder().s(clientId).build());
 
-        QueryRequest queryRequest = QueryRequest.builder()
+        GetItemRequest getItemRequest = GetItemRequest.builder()
                 .tableName("auth_session")
-                .indexName("ClientIdIndex")
-                .keyConditionExpression("#clientId = :clientId")
-                .expressionAttributeNames(expressionAttributeNames)
-                .expressionAttributeValues(expressionAttributeValues)
+                .key(keyToGet)
                 .build();
 
-        return dynamoDbClient.query(queryRequest).items();
+        return dynamoDbClient.getItem(getItemRequest).item();
+    }
+
+    public void logout(String clientId, String sessionId) {
+        HashMap<String, AttributeValue> key = new HashMap<>();
+        key.put("clientId", AttributeValue.builder().s(clientId).build());
+
+        HashMap<String, AttributeValueUpdate> updatedValues  = new HashMap<>();
+        updatedValues.put("status", AttributeValueUpdate.builder()
+                .value(AttributeValue.builder().s(String.valueOf(AccountStatus.INACTIVE)).build())
+                .action(AttributeAction.PUT)
+                .build());
+
+        UpdateItemRequest updateItemRequest = UpdateItemRequest
+                .builder()
+                .tableName("auth_session")
+                .key(key)
+                .attributeUpdates(updatedValues)
+                .build();
+
+        try {
+            dynamoDbClient.updateItem(updateItemRequest);
+        } catch (ConditionalCheckFailedException e) {
+            throw new RuntimeException("Session not found", e);
+        }
     }
 
 }

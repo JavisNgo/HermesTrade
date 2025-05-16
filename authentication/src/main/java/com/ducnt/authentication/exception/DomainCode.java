@@ -10,6 +10,7 @@ public enum DomainCode {
     ACCOUNT_INCORRECT("Account Incorrect", "001"),
     EMAIL_INCORRECT("Email Incorrect", "002"),
     RATE_LIMIT_EXCEEDED("Too many login attempts. Please try again later.", "003"),
+    SERVICE_UNAVAILABLE("Service Unavailable", "004"),
     ;
 
     private final String SERVICE_IDENTIFIER = "0602";
