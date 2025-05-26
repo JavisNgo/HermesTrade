@@ -16,7 +16,6 @@ public class ErrorResponse {
     private String errorMessage;
 
     public static ErrorResponse fromDomainEnumResponse(DomainCode domainCode) {
-
         return ErrorResponse.builder()
                 .errorCode(domainCode.getErrorCode())
                 .errorMessage(domainCode.getMessage())

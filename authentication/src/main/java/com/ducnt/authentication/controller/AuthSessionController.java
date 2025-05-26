@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -20,7 +18,7 @@ public class AuthSessionController {
     AuthSessionService authSessionService;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthSessionResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthSessionResponse> login(@RequestBody LoginRequest loginRequest){
         AuthSessionResponse response = authSessionService.authenticate(loginRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

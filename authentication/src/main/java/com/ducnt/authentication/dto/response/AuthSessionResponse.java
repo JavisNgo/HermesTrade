@@ -22,7 +22,7 @@ public class AuthSessionResponse {
         return AuthSessionResponse.builder()
                 .clientId(UUID.fromString(items.get("clientId").s()))
                 .sessionId(UUID.fromString(items.get("sessionId").s()))
-                .status(AccountStatus.ACTIVE)
+                .status(AccountStatus.valueOf(items.get("status").s()))
                 .build();
     }
 }

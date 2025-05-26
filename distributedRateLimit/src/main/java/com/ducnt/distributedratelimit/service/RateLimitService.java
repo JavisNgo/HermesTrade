@@ -8,29 +8,26 @@ import com.ducnt.distributedratelimit.utils.Util;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RateLimitService implements IRateLimitService {
-    DynamoDbEnhancedClient enhancedClient;
 
-    static String TABLE_NAME = "token_record";
+    DynamoDbTable<TokenRecord> tokenRecordTable;
+
     static int DEFAULT_CAPACITY = 5;
     static int REFILL_RATE = 1/60;
     static int REQUEST_TOKEN = 1;
 
     @Override
-    public boolean rateLimit(RateLimitRequest request) {
-        DynamoDbTable<TokenRecord> tokenRecordTable = enhancedClient.table(TABLE_NAME,
-                TableSchema.fromBean(TokenRecord.class));
-
+    public boolean handelRateLimit(RateLimitRequest request) {
 
         String sortKey = request.getClientId() != null ? request.getClientId() : request.getIpAddress();
 
@@ -57,6 +54,7 @@ public class RateLimitService implements IRateLimitService {
                 return false;
             }
         } catch (ConditionalCheckFailedException e) {
+            log.warn( e.getMessage());
             throw new DomainException(DomainCode.REQUEST_CONFLICT);
         }
     }

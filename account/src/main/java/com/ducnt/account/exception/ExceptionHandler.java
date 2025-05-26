@@ -12,7 +12,7 @@ public class ExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDomainException(DomainException e) {
         ErrorResponse errorResponse = ErrorResponse.fromDomainEnumResponse(e.getDomainCode());
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(e.getHttpStatus())
                 .body(errorResponse);
     }
 
