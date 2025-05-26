@@ -22,6 +22,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
+    UUID clientId;
     String email;
     String password;
     String fullName;
@@ -35,6 +36,7 @@ public class Account {
         return Account.builder()
                 .email(request.getEmail())
                 .address(request.getAddress())
+                .clientId(UUID.randomUUID())
                 .fullName(request.getFullName())
                 .birthDate(request.getBirthDate())
                 .status(AccountStatus.ACTIVE)

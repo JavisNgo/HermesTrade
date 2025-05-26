@@ -1,8 +1,27 @@
 services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:latest
+    environment:
+      - DEBUG=1
+      - AWS_CBOR_DISABLE=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOSTNAME=localstack
+      - SERVICES=dynamodb
+      - AWS_DEFAULT_REGION=us-east-1
+    ports:
+      - '4566:4566'
+    volumes:
+      - "localstack_data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./script/localstack/dynamodb/auth-session.json:/table-schema.json"
+      - "./script/localstack/dynamodb/init-dynamodb.sh:/etc/localstack/init/ready.d/init-dynamodb.sh"
+
   postgres:
     image: postgres:latest
     container_name: postgres_server
     environment:
+      POSTGRES_DB: account
       POSTGRES_USER: root
       POSTGRES_PASSWORD: 12345
     ports:
@@ -22,5 +41,7 @@ networks:
     driver: bridge
 
 volumes:
+  localstack_data:
+    driver: local
   postgres_data:
     driver: local

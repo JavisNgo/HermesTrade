@@ -1,0 +1,19 @@
+{
+  "TableName": "auth_session",
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "clientId",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "clientId",
+      "KeyType": "HASH"
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}

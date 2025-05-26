@@ -26,4 +26,5 @@ public class AccountController {
         UserCreationResponse userCreationResponse = activationService.activateUser(request);
         return new ResponseEntity<>(userCreationResponse, HttpStatus.ACCEPTED);
     }
+
 }
