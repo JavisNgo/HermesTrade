@@ -14,6 +14,7 @@ import com.ducnt.account.repository.AccountRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ public class AccountService implements IAccountService {
     public UserCreationResponse activateUser(UserRegistrationRequest request) {
         Optional<Account> user = accountRepository.findByEmail(request.getEmail());
         if (user.isPresent()) {
-            throw new DomainException(DomainCode.EMAIL_ALREADY_EXISTS);
+            throw new DomainException(DomainCode.EMAIL_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
         Account account = Account.fromUserRequest(request);
         account.onUpdatePassword(passwordEncoder.encode(request.getPassword()));
@@ -50,10 +51,10 @@ public class AccountService implements IAccountService {
     @Override
     public ValidationAccountResponse validateAccount(LoginRequest request) {
         Account account = accountRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new DomainException(DomainCode.EMAIL_INVALID));
+                .orElseThrow(() -> new DomainException(DomainCode.EMAIL_INVALID, HttpStatus.BAD_REQUEST));
 
         if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
-            throw new DomainException(DomainCode.PASSWORD_INCORRECT);
+            throw new DomainException(DomainCode.PASSWORD_INCORRECT, HttpStatus.BAD_REQUEST);
         }
 
         return ValidationAccountResponse.formAccount(account);

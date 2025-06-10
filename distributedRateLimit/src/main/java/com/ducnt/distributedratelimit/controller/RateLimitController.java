@@ -1,6 +1,7 @@
 package com.ducnt.distributedratelimit.controller;
 
 import com.ducnt.distributedratelimit.dto.request.RateLimitRequest;
+import com.ducnt.distributedratelimit.dto.response.ApiResponse;
 import com.ducnt.distributedratelimit.service.IRateLimitService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -21,12 +22,12 @@ public class RateLimitController {
     IRateLimitService rateLimitService;
 
     @PostMapping("/rate-limit")
-    public ResponseEntity<Object> RateLimit(@RequestBody @Valid RateLimitRequest request) {
-        boolean result = rateLimitService.rateLimit(request);
+    public ResponseEntity<ApiResponse> handleRateLimit(@RequestBody @Valid RateLimitRequest request) {
+        boolean result = rateLimitService.handelRateLimit(request);
         if (result) {
-            return new ResponseEntity<>("Pass rate-limit", HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(ApiResponse.builder().message("Pass rate-limit").build(), HttpStatus.ACCEPTED);
         } else {
-            return new ResponseEntity<>("Rate limit exceeded", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponse.builder().message("Rate limit exceeded").build(), HttpStatus.BAD_REQUEST);
         }
     }
 }

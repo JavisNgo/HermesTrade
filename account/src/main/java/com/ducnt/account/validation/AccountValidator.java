@@ -6,6 +6,7 @@ import com.ducnt.account.exception.DomainCode;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -26,22 +27,22 @@ public class AccountValidator implements ConstraintValidator<AccountConstraint, 
     @Override
     public boolean isValid(UserRegistrationRequest userRegistrationRequest, ConstraintValidatorContext context) {
         if(Strings.isEmpty(userRegistrationRequest.getAddress()))
-            throw new DomainException(DomainCode.ADDRESS_IS_REQUIRED);
+            throw new DomainException(DomainCode.ADDRESS_IS_REQUIRED, HttpStatus.BAD_REQUEST);
 
         if(Strings.isEmpty(userRegistrationRequest.getFullName()))
-            throw new DomainException(DomainCode.FULL_NAME_IS_REQUIRED);
+            throw new DomainException(DomainCode.FULL_NAME_IS_REQUIRED, HttpStatus.BAD_REQUEST);
 
         if(validateDob(userRegistrationRequest.getBirthDate())) {
-            throw new DomainException(DomainCode.AGE_MUST_BE_AT_LEAST);
+            throw new DomainException(DomainCode.AGE_MUST_BE_AT_LEAST, HttpStatus.BAD_REQUEST);
         }
         if(validatePasswordLength(userRegistrationRequest.getPassword()))
-            throw new DomainException(DomainCode.PASSWORD_LENGTH_INVALID);
+            throw new DomainException(DomainCode.PASSWORD_LENGTH_INVALID, HttpStatus.BAD_REQUEST);
 
         if(!validatePasswordPattern(userRegistrationRequest.getPassword()))
-            throw new DomainException(DomainCode.WEAK_PASSWORD);
+            throw new DomainException(DomainCode.WEAK_PASSWORD, HttpStatus.BAD_REQUEST);
 
         if(!validateEmail(userRegistrationRequest.getEmail()))
-            throw new DomainException(DomainCode.EMAIL_INVALID);
+            throw new DomainException(DomainCode.EMAIL_INVALID, HttpStatus.BAD_REQUEST);
 
         return true;
     }

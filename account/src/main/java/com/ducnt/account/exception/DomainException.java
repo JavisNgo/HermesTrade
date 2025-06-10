@@ -12,8 +12,15 @@ import org.springframework.http.HttpStatus;
 public class DomainException extends RuntimeException {
     DomainCode domainCode;
     HttpStatus httpStatus;
+
     public DomainException(DomainCode domainCode) {
         super(domainCode.getMessage());
         this.domainCode = domainCode;
+    }
+
+    public DomainException(DomainCode domainCode, HttpStatus httpStatus) {
+        super(domainCode.getMessage());
+        this.domainCode = domainCode;
+        this.httpStatus = httpStatus;
     }
 }
