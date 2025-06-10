@@ -6,12 +6,15 @@ import com.ducnt.account.model.AccountBalance;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class UserCreationResponse {
+    UUID clientId;
     String email;
     AccountStatus status;
     long availableBalance;
@@ -27,8 +30,9 @@ public class UserCreationResponse {
                 .build();
     }
 
-    public static UserCreationResponse fromAccountAndAccountBalance(Account account, AccountBalance accountBalance) {
+    public static UserCreationResponse onCreationSuccess(Account account, AccountBalance accountBalance) {
         return UserCreationResponse.builder()
+                .clientId(account.getClientId())
                 .email(account.getEmail())
                 .status(account.getStatus())
                 .availableBalance(accountBalance.getAvailableBalance())
