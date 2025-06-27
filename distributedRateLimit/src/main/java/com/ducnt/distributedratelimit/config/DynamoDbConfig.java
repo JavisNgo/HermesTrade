@@ -15,11 +15,12 @@ import java.net.URI;
 
 @Configuration
 public class DynamoDbConfig {
+    private static final String dynamoDbUrl = "http://localhost:4566";
     @Bean
     public DynamoDbClient dynamoDbClient() {
 
         return DynamoDbClient.builder()
-                .endpointOverride(URI.create("http://localhost:4566"))
+                .endpointOverride(URI.create(dynamoDbUrl))
                 .region(Region.US_EAST_1)
                 .build();
     }

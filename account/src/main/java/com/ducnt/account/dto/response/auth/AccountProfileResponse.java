@@ -1,4 +1,4 @@
-package com.ducnt.account.dto.response;
+package com.ducnt.account.dto.response.auth;
 
 import com.ducnt.account.enums.AccountStatus;
 import com.ducnt.account.enums.ProfileType;
@@ -7,6 +7,7 @@ import com.ducnt.account.model.AccountBalance;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -19,8 +20,8 @@ public class AccountProfileResponse {
     ProfileType profileType;
     UUID accountNo;
     String fullName;
-    long availableBalance;
-    long actualBalance;
+    BigDecimal availableBalance;
+    BigDecimal actualBalance;
     AccountStatus status;
 
     public static AccountProfileResponse onCreationSuccess(Account account, AccountBalance accountBalance) {

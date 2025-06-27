@@ -1,4 +1,4 @@
-package com.ducnt.account.dto.response;
+package com.ducnt.account.dto.response.auth;
 
 import com.ducnt.account.exception.DomainCode;
 import com.fasterxml.jackson.annotation.JsonInclude;

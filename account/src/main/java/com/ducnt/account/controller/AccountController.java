@@ -1,8 +1,8 @@
 package com.ducnt.account.controller;
 
-import com.ducnt.account.dto.request.UserRegistrationRequest;
-import com.ducnt.account.dto.response.AccountProfileResponse;
-import com.ducnt.account.dto.response.UserCreationResponse;
+import com.ducnt.account.dto.request.auth.UserRegistrationRequest;
+import com.ducnt.account.dto.response.auth.AccountProfileResponse;
+import com.ducnt.account.dto.response.auth.UserCreationResponse;
 import com.ducnt.account.service.IAccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -11,8 +11,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

@@ -1,4 +1,4 @@
-package com.ducnt.account.dto.request;
+package com.ducnt.account.dto.request.auth;
 
 import com.ducnt.account.validation.AccountConstraint;
 import lombok.AccessLevel;

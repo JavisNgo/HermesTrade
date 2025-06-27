@@ -1,4 +1,4 @@
-package com.ducnt.account.dto.response;
+package com.ducnt.account.dto.response.auth;
 
 import com.ducnt.account.enums.AccountStatus;
 import com.ducnt.account.model.Account;
@@ -6,6 +6,7 @@ import com.ducnt.account.model.AccountBalance;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -17,7 +18,7 @@ public class UserCreationResponse {
     UUID clientId;
     String email;
     AccountStatus status;
-    long availableBalance;
+    BigDecimal availableBalance;
     String localCurrency;
 
     @Builder.Default

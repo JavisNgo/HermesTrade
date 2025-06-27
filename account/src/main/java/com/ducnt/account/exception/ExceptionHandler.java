@@ -1,6 +1,6 @@
 package com.ducnt.account.exception;
 
-import com.ducnt.account.dto.response.ErrorResponse;
+import com.ducnt.account.dto.response.auth.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

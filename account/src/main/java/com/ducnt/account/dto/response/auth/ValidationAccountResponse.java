@@ -1,4 +1,4 @@
-package com.ducnt.account.dto.response;
+package com.ducnt.account.dto.response.auth;
 
 import com.ducnt.account.enums.AccountStatus;
 import com.ducnt.account.model.Account;

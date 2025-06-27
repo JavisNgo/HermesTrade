@@ -15,6 +15,8 @@ public enum DomainCode {
     ADDRESS_IS_REQUIRED("Address Is Required","006"),
     EMAIL_ALREADY_EXISTS("Email Already Exists", "007"),
     PASSWORD_INCORRECT("Password Incorrect", "008"),
+    UNEXPECTED_ERROR_CODE("Unexpected Error Code", "009"),
+    SERVICE_UNAVAILABLE("Service Unavailable", "010"),
     ;
 
     private final String SERVICE_IDENTIFIER = "0601";

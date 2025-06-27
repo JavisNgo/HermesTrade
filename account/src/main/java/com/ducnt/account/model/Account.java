@@ -1,6 +1,7 @@
 package com.ducnt.account.model;
 
-import com.ducnt.account.dto.request.UserRegistrationRequest;
+import com.ducnt.account.dto.request.auth.UserRegistrationRequest;
+import com.ducnt.account.dto.response.binance.FilteredAdvertiser;
 import com.ducnt.account.enums.AccountStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -44,7 +45,22 @@ public class Account {
                 .build();
     }
 
+    public static Account fromFilteredAdvertiser(FilteredAdvertiser advertiser) {
+        return Account.builder()
+                .email(normalizeNickName(advertiser.getNickName())+"@gmail.com")
+                .clientId(UUID.randomUUID())
+                .fullName(advertiser.getNickName())
+                .status(AccountStatus.ACTIVE)
+                .createdDate(LocalDate.now())
+                .build();
+
+    }
+
     public void onUpdatePassword(String password) {
         this.password = password;
+    }
+
+    public static String normalizeNickName(String nickName) {
+        return nickName.toLowerCase().replaceAll("\\P{Alnum}", "");
     }
 }
