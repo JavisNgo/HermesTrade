@@ -22,4 +22,5 @@ public class InternalAccountController {
         ValidationAccountResponse validationAccountResponse = activationService.validateAccount(request);
         return new ResponseEntity<>(validationAccountResponse, HttpStatus.OK);
     }
+
 }

@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: transfer
+
+server:
+  port: 8084
+clients:
+  account:
+    url: http://localhost:8080/api/v1
