@@ -4,6 +4,7 @@ import com.ducnt.transfer.clients.AccountClient;
 import com.ducnt.transfer.dto.request.TradeRequest;
 import com.ducnt.transfer.dto.response.AccountProfileResponse;
 import com.ducnt.transfer.dto.response.TransferResponse;
+import com.ducnt.transfer.enums.Action;
 import com.ducnt.transfer.exception.DomainCode;
 import com.ducnt.transfer.exception.DomainException;
 import com.ducnt.transfer.models.Integration;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.math.BigDecimal;
@@ -51,13 +53,17 @@ public class TransferService implements ITransferService {
         Integration fromAccountIntegration = Integration.onCreation(fromAccount, externalRef);
         Integration toAccountIntegration = Integration.onCreation(toAccount, externalRef);
 
-        BigDecimal actualBalance = new BigDecimal(fromAccountIntegration.getActualBalance());
+        BigDecimal newAvailableBalance = fromAccount.getAvailableBalance().subtract(tradeRequest.getAmount());
 
-        if (tradeRequest.getAmount().compareTo(actualBalance) > 0) {
+        if (newAvailableBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new DomainException(DomainCode.INSUFFICIENT_BALANCE,HttpStatus.BAD_REQUEST);
         }
 
+        fromAccountIntegration.setCurrentBalance(newAvailableBalance.toString());
+
         TransferOrder transferOrder = TransferOrder.onCreation(tradeRequest, externalRef);
+        transferOrder.setAction(String.valueOf(Action.REVERSE));
+
         Utility utility = new Utility();
         utility.setIdempotencyKey(idempotencyKey);
 
@@ -67,10 +73,14 @@ public class TransferService implements ITransferService {
         transferOrder.setTtl(ttl);
 
         try {
-            integrationTable.putItem(fromAccountIntegration);
-            integrationTable.putItem(toAccountIntegration);
-            transferOrderTable.putItem(transferOrder);
-            utilityTable.putItem(utility);
+            Expression expression = Expression.builder()
+                    .expression("attribute_not_exists(pk)")
+                    .build();
+            integrationTable.putItem(r ->
+                    r.item(fromAccountIntegration).conditionExpression(expression));
+            transferOrderTable.putItem(r ->
+                    r.item(transferOrder).conditionExpression(expression));
+            utilityTable.putItem(r -> r.item(utility).conditionExpression(expression));
         } catch (ConditionalCheckFailedException e) {
             throw new DomainException(DomainCode.DATABASE_ERROR, HttpStatus.BAD_REQUEST);
         }
@@ -109,4 +119,6 @@ public class TransferService implements ITransferService {
 
         return response.getBody();
     }
+
+
 }

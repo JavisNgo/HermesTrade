@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbAtomicCounter;
+import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbVersionAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
@@ -22,6 +23,12 @@ public class Utility {
     String idempotencyKey;
     @Getter
     Long ttl;
+    Long version;
+
+    @DynamoDbVersionAttribute
+    public Long getVersion() {
+        return version;
+    }
 
     @DynamoDbPartitionKey
     public String getPk() {

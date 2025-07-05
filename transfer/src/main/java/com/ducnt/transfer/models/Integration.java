@@ -3,6 +3,7 @@ package com.ducnt.transfer.models;
 import com.ducnt.transfer.dto.response.AccountProfileResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbVersionAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
@@ -36,6 +37,7 @@ public class Integration {
     String updateDate;
     @Getter
     Long ttl;
+    Long version;
 
     @DynamoDbPartitionKey
     public String getPk() {
@@ -45,6 +47,11 @@ public class Integration {
     @DynamoDbSortKey
     public String getSk() {
         return sk == null ? "METADATA#" + clientId : sk;
+    }
+
+    @DynamoDbVersionAttribute
+    public Long getVersion() {
+        return version;
     }
 
     public static Integration onCreation(AccountProfileResponse account, String externalRef) {

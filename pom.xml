@@ -17,6 +17,7 @@
         <module>distributedRateLimit</module>
         <module>account</module>
         <module>authentication</module>
+        <module>transfer</module>
     </modules>
 
     <dependencyManagement>

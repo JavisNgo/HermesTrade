@@ -1,19 +1,16 @@
 package com.ducnt.transfer.models;
 
 import com.ducnt.transfer.dto.request.TradeRequest;
-import com.ducnt.transfer.enums.Action;
 import com.ducnt.transfer.enums.PaymentAction;
 import com.ducnt.transfer.enums.ProcessStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbVersionAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 @DynamoDbBean
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -54,6 +51,8 @@ public class TransferOrder {
     String failReason;
     @Getter
     Long ttl;
+    Long version;
+
 
     @DynamoDbPartitionKey
     public String getPk() {
@@ -63,6 +62,11 @@ public class TransferOrder {
     @DynamoDbSortKey
     public String getSk() {
         return sk == null ? "METADATA#" + externalRef : sk;
+    }
+
+    @DynamoDbVersionAttribute
+    public Long getVersion() {
+        return version;
     }
 
     public static TransferOrder onCreation(TradeRequest request, String externalRef) {
@@ -75,7 +79,6 @@ public class TransferOrder {
                 .externalRef(externalRef)
                 .processStatus(String.valueOf(ProcessStatus.PENDING))
                 .paymentAction(String.valueOf(PaymentAction.TRANSFER))
-                .action(String.valueOf(Action.INITIATE))
                 .build();
     }
 }
