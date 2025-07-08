@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -109,4 +110,14 @@ public class AccountService implements IAccountService {
         accountRepository.saveAll(accounts);
         accountBalanceRepository.saveAll(accountBalances);
     }
+
+    @Override
+    public void reserveAccountBalance(String clientId, String balance) {
+        AccountBalance accountBalance = accountBalanceRepository.findByClientId(UUID.fromString(clientId))
+                .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND));
+        BigDecimal updatedBalance = new BigDecimal(balance);
+        accountBalance.setAvailableBalance(updatedBalance);
+        accountBalanceRepository.save(accountBalance);
+    }
+
 }

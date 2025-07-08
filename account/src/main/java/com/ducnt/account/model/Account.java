@@ -3,10 +3,7 @@ package com.ducnt.account.model;
 import com.ducnt.account.dto.request.auth.UserRegistrationRequest;
 import com.ducnt.account.dto.response.binance.FilteredAdvertiser;
 import com.ducnt.account.enums.AccountStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -24,6 +21,7 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
     UUID clientId;
+    @Column(unique = true)
     String email;
     String password;
     String fullName;

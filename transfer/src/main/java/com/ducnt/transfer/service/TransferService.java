@@ -16,8 +16,11 @@ import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
@@ -33,11 +36,16 @@ import java.util.Optional;
 public class TransferService implements ITransferService {
     static long SESSION_TTL_SECONDS = 1800L;
 
+    @Value("${kafka.topic.name}")
+    @NonFinal
+    String accountTopic;
+
     DynamoDbTable<Integration> integrationTable;
     DynamoDbTable<TransferOrder> transferOrderTable;
     DynamoDbTable<Utility> utilityTable;
     AccountClient accountClient;
     ObjectMapper objectMapper;
+    KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
     public TransferResponse reserve(TradeRequest tradeRequest, String idempotencyKey) {
@@ -76,15 +84,17 @@ public class TransferService implements ITransferService {
             Expression expression = Expression.builder()
                     .expression("attribute_not_exists(pk)")
                     .build();
+            utilityTable.putItem(r -> r.item(utility).conditionExpression(expression));
             integrationTable.putItem(r ->
                     r.item(fromAccountIntegration).conditionExpression(expression));
             transferOrderTable.putItem(r ->
                     r.item(transferOrder).conditionExpression(expression));
-            utilityTable.putItem(r -> r.item(utility).conditionExpression(expression));
         } catch (ConditionalCheckFailedException e) {
             throw new DomainException(DomainCode.DATABASE_ERROR, HttpStatus.BAD_REQUEST);
         }
 
+        kafkaTemplate.send(accountTopic, 1,
+                fromAccount.getClientId().toString(), "RESERVE#" + newAvailableBalance.toString());
         return TransferResponse.onCreation(transferOrder, idempotencyKey);
     }
 
@@ -105,7 +115,7 @@ public class TransferService implements ITransferService {
                 if (domainCode.isPresent()) {
                     throw new DomainException(domainCode.get(), HttpStatus.BAD_REQUEST);
                 } else {
-                    throw new DomainException(DomainCode.UNEXPECTED_ERROR_CODE, HttpStatus.BAD_REQUEST);
+                    throw new DomainException(DomainCode.SERVICE_UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
                 }
 
             } catch (Exception ignored) {

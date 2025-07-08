@@ -11,4 +11,5 @@ public interface IAccountService {
     ValidationAccountResponse validateAccount(LoginRequest request);
     AccountProfileResponse getAccountProfile(String clientId);
     void getAdvertisements();
+    void reserveAccountBalance(String clientId, String balance);
 }

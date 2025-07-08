@@ -16,7 +16,10 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner() {
         return args -> {
-            accountService.getAdvertisements();
+            try {
+                accountService.getAdvertisements();
+            } catch (Exception ignored) {
+            }
         };
     }
 }
