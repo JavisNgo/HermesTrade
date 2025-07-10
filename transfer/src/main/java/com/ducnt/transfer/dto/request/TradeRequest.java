@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -15,6 +16,5 @@ public class TradeRequest {
     String purpose;
     BigDecimal amount;
     Long timestamp = Util.getEpochTimeStamp();
-    String fromAccountId;
-    String toAccountId;
+    List<Instruction> instructions;
 }

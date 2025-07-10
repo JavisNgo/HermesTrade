@@ -20,7 +20,7 @@ public class TransferController {
             @RequestHeader(name = "idempotency-key") String idempotencyKey,
             @RequestBody TradeRequest tradeRequest
     ) {
-        TransferResponse result = transferService.reserve(tradeRequest, idempotencyKey);
+        TransferResponse result = transferService.initiateP2PTransaction(tradeRequest, idempotencyKey);
         return ResponseEntity.ok(result);
     }
 }

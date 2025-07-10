@@ -24,7 +24,7 @@ public class TransferOrder {
     @Getter
     String externalRef;
     @Getter
-    String accountId;
+    String clientId;
     @Getter
     String action;
     @Getter
@@ -32,23 +32,18 @@ public class TransferOrder {
     @Getter
     String processStatus;
     @Getter
-    String clientId;
-    @Getter
     String requestType; // purpose
     @Getter
     String updateDate;
     @Getter
-    String fromAccountId;
-    @Getter
-    String toAccountId;
-    @Getter
     String amount;
+    String reservePaymentRef;
+    @Getter
+    String finalizePaymentRef;
     @Getter
     String createdAt;
     @Getter
     String completedAt;
-    @Getter
-    String failReason;
     @Getter
     Long ttl;
     Long version;
@@ -64,6 +59,10 @@ public class TransferOrder {
         return sk == null ? "METADATA#" + externalRef : sk;
     }
 
+    public String getReservePaymentRef() {
+        return reservePaymentRef == null ? "PAY#" + externalRef : reservePaymentRef;
+    }
+
     @DynamoDbVersionAttribute
     public Long getVersion() {
         return version;
@@ -71,8 +70,7 @@ public class TransferOrder {
 
     public static TransferOrder onCreation(TradeRequest request, String externalRef) {
         return TransferOrder.builder()
-                .fromAccountId(request.getFromAccountId())
-                .toAccountId(request.getToAccountId())
+                .externalRef(externalRef)
                 .requestType(request.getPurpose())
                 .amount(String.valueOf(request.getAmount()))
                 .createdAt(String.valueOf(LocalDate.now()))

@@ -30,7 +30,7 @@ public class Util {
 
         String formattedCounter = String.format("%0" + COUNTER_LENGTH + "d", currentCounter);
 
-        return "TRA" + getEpochTimeStamp() + formattedCounter;
+        return getEpochTimeStamp() + formattedCounter;
     }
 
 }

@@ -1,10 +1,12 @@
 package com.ducnt.transfer.service;
 
 import com.ducnt.transfer.clients.AccountClient;
+import com.ducnt.transfer.dto.request.Instruction;
 import com.ducnt.transfer.dto.request.TradeRequest;
 import com.ducnt.transfer.dto.response.AccountProfileResponse;
 import com.ducnt.transfer.dto.response.TransferResponse;
 import com.ducnt.transfer.enums.Action;
+import com.ducnt.transfer.enums.UnitRef;
 import com.ducnt.transfer.exception.DomainCode;
 import com.ducnt.transfer.exception.DomainException;
 import com.ducnt.transfer.models.Integration;
@@ -48,53 +50,51 @@ public class TransferService implements ITransferService {
     KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
-    public TransferResponse reserve(TradeRequest tradeRequest, String idempotencyKey) {
+    public TransferResponse initiateP2PTransaction(TradeRequest tradeRequest, String idempotencyKey) {
         String externalRef = Util.generateExternalRef(tradeRequest.getTimestamp());
 
-        AccountProfileResponse fromAccount = getAccountProfile(tradeRequest.getFromAccountId());
-        AccountProfileResponse toAccount = getAccountProfile(tradeRequest.getToAccountId());
+        Instruction reservationAccount = tradeRequest.getInstructions().stream()
+                .filter(r -> r.getSide().equals("DEBIT"))
+                .findFirst()
+                .orElseThrow(() -> new DomainException(DomainCode.INSUFFICIENT_BALANCE,HttpStatus.BAD_REQUEST));
 
-        if(fromAccount == null || toAccount == null) {
+        AccountProfileResponse reservationAccountProfile = getAccountProfile(reservationAccount.getClientId());
+        if(reservationAccountProfile == null) {
             throw new DomainException(DomainCode.SERVICE_UNAVAILABLE,HttpStatus.SERVICE_UNAVAILABLE);
         }
 
-        Integration fromAccountIntegration = Integration.onCreation(fromAccount, externalRef);
-        Integration toAccountIntegration = Integration.onCreation(toAccount, externalRef);
-
-        BigDecimal newAvailableBalance = fromAccount.getAvailableBalance().subtract(tradeRequest.getAmount());
+        BigDecimal newAvailableBalance = reservationAccountProfile.getAvailableBalance()
+                .subtract(tradeRequest.getAmount());
 
         if (newAvailableBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new DomainException(DomainCode.INSUFFICIENT_BALANCE,HttpStatus.BAD_REQUEST);
         }
 
-        fromAccountIntegration.setCurrentBalance(newAvailableBalance.toString());
-
         TransferOrder transferOrder = TransferOrder.onCreation(tradeRequest, externalRef);
         transferOrder.setAction(String.valueOf(Action.REVERSE));
+        Integration integration = Integration.onCreation(tradeRequest);
 
         Utility utility = new Utility();
         utility.setIdempotencyKey(idempotencyKey);
 
         Long ttl = Util.getEpochTimeStamp() + SESSION_TTL_SECONDS;
-        fromAccountIntegration.setTtl(ttl);
-        toAccountIntegration.setTtl(ttl);
         transferOrder.setTtl(ttl);
 
         try {
             Expression expression = Expression.builder()
-                    .expression("attribute_not_exists(pk)")
+                    .expression("attribute_not_exists(pk) && attribute_not_exists(sk)")
                     .build();
             utilityTable.putItem(r -> r.item(utility).conditionExpression(expression));
-            integrationTable.putItem(r ->
-                    r.item(fromAccountIntegration).conditionExpression(expression));
             transferOrderTable.putItem(r ->
                     r.item(transferOrder).conditionExpression(expression));
+            integrationTable.putItem(r -> r.item(integration).conditionExpression(expression));
         } catch (ConditionalCheckFailedException e) {
             throw new DomainException(DomainCode.DATABASE_ERROR, HttpStatus.BAD_REQUEST);
         }
 
         kafkaTemplate.send(accountTopic, 1,
-                fromAccount.getClientId().toString(), "RESERVE#" + newAvailableBalance.toString());
+                reservationAccount.getClientId(), "RESERVE#" + newAvailableBalance.toString());
+
         return TransferResponse.onCreation(transferOrder, idempotencyKey);
     }
 
@@ -129,6 +129,5 @@ public class TransferService implements ITransferService {
 
         return response.getBody();
     }
-
 
 }

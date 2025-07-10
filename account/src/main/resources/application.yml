@@ -20,4 +20,4 @@ spring:
       mode: always
 kafka:
   topic:
-    name: account
+    name: account-balance-reserve
