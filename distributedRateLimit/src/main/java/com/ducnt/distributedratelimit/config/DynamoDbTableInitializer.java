@@ -15,7 +15,8 @@ import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 public class DynamoDbTableInitializer {
 
     @Bean
-    DynamoDbTable<TokenRecord> tokenRecordTable(DynamoDbClient dynamoDbClient, DynamoDbEnhancedClient enhancedClient) {
+    DynamoDbTable<TokenRecord> tokenRecordTable(DynamoDbClient dynamoDbClient,
+                                                DynamoDbEnhancedClient enhancedClient) {
         DynamoDbTable<TokenRecord> tokenRecordTable = enhancedClient.table("token_record",
                 TableSchema.fromBean(TokenRecord.class));
         try {

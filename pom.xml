@@ -11,12 +11,14 @@
         <java.version>17</java.version>
         <spring-boot-dependencies.version>3.4.5</spring-boot-dependencies.version>
         <spring.boot.maven.plugin.version>3.4.5</spring.boot.maven.plugin.version>
+        <spring-cloud-aws.version>3.3.0</spring-cloud-aws.version>
     </properties>
 
     <modules>
         <module>distributedRateLimit</module>
         <module>account</module>
         <module>authentication</module>
+        <module>transfer</module>
     </modules>
 
     <dependencyManagement>
@@ -31,7 +33,7 @@
             <dependency>
                 <groupId>io.awspring.cloud</groupId>
                 <artifactId>spring-cloud-aws</artifactId>
-                <version>3.3.0</version>
+                <version>${spring-cloud-aws.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

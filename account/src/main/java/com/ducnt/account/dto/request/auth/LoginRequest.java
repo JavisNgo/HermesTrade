@@ -1,4 +1,4 @@
-package com.ducnt.account.dto.request;
+package com.ducnt.account.dto.request.auth;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

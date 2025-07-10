@@ -1,6 +1,6 @@
 package com.ducnt.account.validation;
 
-import com.ducnt.account.dto.request.UserRegistrationRequest;
+import com.ducnt.account.dto.request.auth.UserRegistrationRequest;
 import com.ducnt.account.exception.DomainException;
 import com.ducnt.account.exception.DomainCode;
 import jakarta.validation.ConstraintValidator;

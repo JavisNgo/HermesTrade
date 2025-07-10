@@ -1,32 +1,44 @@
 package com.ducnt.account.service;
 
-import com.ducnt.account.dto.request.LoginRequest;
-import com.ducnt.account.dto.request.UserRegistrationRequest;
-import com.ducnt.account.dto.response.UserCreationResponse;
-import com.ducnt.account.dto.response.ValidationAccountResponse;
+import com.ducnt.account.clients.AdvertisementClient;
+import com.ducnt.account.dto.request.auth.LoginRequest;
+import com.ducnt.account.dto.request.auth.UserRegistrationRequest;
+import com.ducnt.account.dto.request.binance.AdvertisementApiRequest;
+import com.ducnt.account.dto.response.auth.AccountProfileResponse;
+import com.ducnt.account.dto.response.auth.ErrorResponse;
+import com.ducnt.account.dto.response.auth.UserCreationResponse;
+import com.ducnt.account.dto.response.auth.ValidationAccountResponse;
+import com.ducnt.account.dto.response.binance.AdvertisementApiResponse;
+import com.ducnt.account.dto.response.binance.FilteredAdvertisementData;
 import com.ducnt.account.exception.DomainException;
 import com.ducnt.account.exception.DomainCode;
 import com.ducnt.account.model.Account;
 import com.ducnt.account.model.AccountBalance;
 import com.ducnt.account.repository.AccountBalanceRepository;
 import com.ducnt.account.repository.AccountRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 
-@Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Service
 public class AccountService implements IAccountService {
 
     AccountRepository accountRepository;
     AccountBalanceRepository accountBalanceRepository;
     PasswordEncoder passwordEncoder;
+    AdvertisementClient advertisementClient;
+    ObjectMapper objectMapper;
 
     @Override
     public UserCreationResponse activateUser(UserRegistrationRequest request) {
@@ -42,7 +54,7 @@ public class AccountService implements IAccountService {
         accountBalanceRepository.save(accountBalance);
         accountRepository.save(account);
 
-        return UserCreationResponse.fromAccountAndAccountBalance(account, accountBalance);
+        return UserCreationResponse.onCreationSuccess(account, accountBalance);
     }
 
     @Override
@@ -56,4 +68,56 @@ public class AccountService implements IAccountService {
 
         return ValidationAccountResponse.formAccount(account);
     }
+
+    @Override
+    public AccountProfileResponse getAccountProfile(String clientId) {
+        Account account = accountRepository.findByClientId(UUID.fromString(clientId))
+                .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND, HttpStatus.BAD_REQUEST));
+
+        AccountBalance accountBalance = accountBalanceRepository.findByClientId(UUID.fromString(clientId))
+                .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND, HttpStatus.BAD_REQUEST));
+
+        return AccountProfileResponse.onCreationSuccess(account, accountBalance);
+    }
+
+    @Override
+    public void getAdvertisements() {
+        ResponseEntity<AdvertisementApiResponse> advertisement = null;
+        try {
+            advertisement = advertisementClient.getAdvertisement(new AdvertisementApiRequest());
+
+        } catch (FeignException.FeignClientException e) {
+            try {
+                throw new DomainException(DomainCode.SERVICE_UNAVAILABLE, HttpStatus.BAD_REQUEST);
+            } catch (Exception ignored) {
+                throw new DomainException(DomainCode.UNEXPECTED_ERROR_CODE, HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        if(advertisement == null) throw new DomainException(DomainCode.SERVICE_UNAVAILABLE,
+                HttpStatus.SERVICE_UNAVAILABLE);
+        AdvertisementApiResponse body = advertisement.getBody();
+        if(body == null) throw new DomainException(DomainCode.SERVICE_UNAVAILABLE,
+                HttpStatus.SERVICE_UNAVAILABLE);
+        List<Account> accounts = new ArrayList<>();
+        List<AccountBalance> accountBalances = new ArrayList<>();
+        for (FilteredAdvertisementData data : body.getData()) {
+            Account account = Account.fromFilteredAdvertiser(data.getAdvertiser());
+            AccountBalance accountBalance = AccountBalance.onCreation(account.getClientId(), data.getAdv());
+            accountBalances.add(accountBalance);
+            accounts.add(account);
+        }
+        accountRepository.saveAll(accounts);
+        accountBalanceRepository.saveAll(accountBalances);
+    }
+
+    @Override
+    public void reserveAccountBalance(String clientId, String balance) {
+        AccountBalance accountBalance = accountBalanceRepository.findByClientId(UUID.fromString(clientId))
+                .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND));
+        BigDecimal updatedBalance = new BigDecimal(balance);
+        accountBalance.setAvailableBalance(updatedBalance);
+        accountBalanceRepository.save(accountBalance);
+    }
+
 }

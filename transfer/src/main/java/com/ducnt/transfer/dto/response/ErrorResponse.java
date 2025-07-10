@@ -1,6 +1,6 @@
-package com.ducnt.account.dto.response;
+package com.ducnt.transfer.dto.response;
 
-import com.ducnt.account.exception.DomainCode;
+import com.ducnt.transfer.exception.DomainCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,6 +16,7 @@ public class ErrorResponse {
     private String errorMessage;
 
     public static ErrorResponse fromDomainEnumResponse(DomainCode domainCode) {
+
         return ErrorResponse.builder()
                 .errorCode(domainCode.getErrorCode())
                 .errorMessage(domainCode.getMessage())

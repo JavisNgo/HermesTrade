@@ -1,17 +1,14 @@
 package com.ducnt.account.controller;
 
-import com.ducnt.account.dto.request.LoginRequest;
-import com.ducnt.account.dto.response.ValidationAccountResponse;
+import com.ducnt.account.dto.request.auth.LoginRequest;
+import com.ducnt.account.dto.response.auth.ValidationAccountResponse;
 import com.ducnt.account.service.IAccountService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -25,4 +22,5 @@ public class InternalAccountController {
         ValidationAccountResponse validationAccountResponse = activationService.validateAccount(request);
         return new ResponseEntity<>(validationAccountResponse, HttpStatus.OK);
     }
+
 }
