@@ -72,10 +72,10 @@ public class AccountService implements IAccountService {
     @Override
     public AccountProfileResponse getAccountProfile(String clientId) {
         Account account = accountRepository.findByClientId(UUID.fromString(clientId))
-                .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND, HttpStatus.BAD_REQUEST));
 
         AccountBalance accountBalance = accountBalanceRepository.findByClientId(UUID.fromString(clientId))
-                .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND, HttpStatus.BAD_REQUEST));
 
         return AccountProfileResponse.onCreationSuccess(account, accountBalance);
     }

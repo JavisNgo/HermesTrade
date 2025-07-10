@@ -1,6 +1,23 @@
 spring:
   application:
     name: transfer
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: group1
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      linger-ms: 10
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    admin:
+      auto-create-topics: true
+      properties:
+        default.topic.creation:
+        partitions: 1
+        replication.factor: 1
 
 server:
   port: 8084

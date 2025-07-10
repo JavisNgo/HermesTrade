@@ -19,11 +19,6 @@ public class AccountEventListener {
 
     @KafkaListener(topics = "${kafka.topic.name}")
     public void consume(@Header(KafkaHeaders.RECEIVED_KEY) String key, String message) {
-        String[] splitString = message.split("#");
-        switch (splitString[0]) {
-            case "RESERVE":
-                accountService.reserveAccountBalance(key, splitString[1]);
-                break;
-        }
+        accountService.reserveAccountBalance(key, message);
     }
 }

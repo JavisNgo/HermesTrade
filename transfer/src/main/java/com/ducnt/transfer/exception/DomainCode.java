@@ -14,6 +14,7 @@ public enum DomainCode {
     INSUFFICIENT_BALANCE("Insufficient Balance", "005"),
 
 
+    ACCOUNT_NOT_FOUND("Account Not Found", "0601000"),
     EMAIL_INVALID("Email is invalid", "0601001"),
     PASSWORD_LENGTH_INVALID("Password Length Should Be At Least 8 Characters","0601002"),
     WEAK_PASSWORD("Weak Password", "0601003"),

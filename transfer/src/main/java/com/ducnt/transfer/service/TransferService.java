@@ -4,6 +4,7 @@ import com.ducnt.transfer.clients.AccountClient;
 import com.ducnt.transfer.dto.request.Instruction;
 import com.ducnt.transfer.dto.request.TradeRequest;
 import com.ducnt.transfer.dto.response.AccountProfileResponse;
+import com.ducnt.transfer.dto.response.ErrorResponse;
 import com.ducnt.transfer.dto.response.TransferResponse;
 import com.ducnt.transfer.enums.Action;
 import com.ducnt.transfer.enums.UnitRef;
@@ -79,10 +80,12 @@ public class TransferService implements ITransferService {
 
         Long ttl = Util.getEpochTimeStamp() + SESSION_TTL_SECONDS;
         transferOrder.setTtl(ttl);
+        utility.setTtl(ttl);
+        integration.setTtl(ttl);
 
         try {
             Expression expression = Expression.builder()
-                    .expression("attribute_not_exists(pk) && attribute_not_exists(sk)")
+                    .expression("attribute_not_exists(pk) and attribute_not_exists(sk)")
                     .build();
             utilityTable.putItem(r -> r.item(utility).conditionExpression(expression));
             transferOrderTable.putItem(r ->
@@ -93,19 +96,19 @@ public class TransferService implements ITransferService {
         }
 
         kafkaTemplate.send(accountTopic, 1,
-                reservationAccount.getClientId(), "RESERVE#" + newAvailableBalance.toString());
+                reservationAccount.getClientId(), newAvailableBalance.toString());
 
-        return TransferResponse.onCreation(transferOrder, idempotencyKey);
+        return TransferResponse.onCreation(transferOrder);
     }
 
     private AccountProfileResponse getAccountProfile(String accountId) {
         ResponseEntity<AccountProfileResponse> response = null;
         try {
             response = accountClient.validateAccount(accountId);
-        } catch (FeignException.FeignClientException e) {
+        } catch (FeignException e) {
             try {
                 String errorBody = e.responseBody().map(bb -> new String(bb.array())).orElse("");
-                DomainCode errorResponse = objectMapper.readValue(errorBody, DomainCode.class);
+                ErrorResponse errorResponse = objectMapper.readValue(errorBody, ErrorResponse.class);
                 String errorCode = errorResponse.getErrorCode();
 
                 Optional<DomainCode> domainCode = Arrays.stream(DomainCode.values())
@@ -118,6 +121,8 @@ public class TransferService implements ITransferService {
                     throw new DomainException(DomainCode.SERVICE_UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
                 }
 
+            } catch (DomainException ex) {
+                throw new DomainException(ex.getDomainCode(), ex.getHttpStatus());
             } catch (Exception ignored) {
                 throw new DomainException(DomainCode.UNEXPECTED_ERROR_CODE, HttpStatus.BAD_REQUEST);
             }
