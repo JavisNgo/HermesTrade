@@ -4,6 +4,7 @@ import com.ducnt.account.clients.AdvertisementClient;
 import com.ducnt.account.dto.request.auth.LoginRequest;
 import com.ducnt.account.dto.request.auth.UserRegistrationRequest;
 import com.ducnt.account.dto.request.binance.AdvertisementApiRequest;
+import com.ducnt.account.dto.request.transfer.FinalizeMessageRequest;
 import com.ducnt.account.dto.response.auth.AccountProfileResponse;
 import com.ducnt.account.dto.response.auth.ErrorResponse;
 import com.ducnt.account.dto.response.auth.UserCreationResponse;
@@ -16,6 +17,8 @@ import com.ducnt.account.model.Account;
 import com.ducnt.account.model.AccountBalance;
 import com.ducnt.account.repository.AccountBalanceRepository;
 import com.ducnt.account.repository.AccountRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.AccessLevel;
@@ -101,7 +104,7 @@ public class AccountService implements IAccountService {
                 HttpStatus.SERVICE_UNAVAILABLE);
         List<Account> accounts = new ArrayList<>();
         List<AccountBalance> accountBalances = new ArrayList<>();
-        for (FilteredAdvertisementData data : body.getData()) {
+        for (FilteredAdvertisementData data : body.getData().subList(1, body.getData().size())) {
             Account account = Account.fromFilteredAdvertiser(data.getAdvertiser());
             AccountBalance accountBalance = AccountBalance.onCreation(account.getClientId(), data.getAdv());
             accountBalances.add(accountBalance);
@@ -118,6 +121,27 @@ public class AccountService implements IAccountService {
         BigDecimal updatedBalance = new BigDecimal(balance);
         accountBalance.setAvailableBalance(updatedBalance);
         accountBalanceRepository.save(accountBalance);
+    }
+
+    @Override
+    public void finalizeAccountBalance(String request) {
+        try {
+            FinalizeMessageRequest finalizeMessageRequest = objectMapper.readValue(request, FinalizeMessageRequest.class);
+            AccountBalance debitBalance = accountBalanceRepository
+                    .findByClientId(UUID.fromString(finalizeMessageRequest.getClientId()))
+                    .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND));
+            AccountBalance creditBalance = accountBalanceRepository
+                    .findByClientId(UUID.fromString(finalizeMessageRequest.getDestinationClientId()))
+                    .orElseThrow(() -> new DomainException(DomainCode.ACCOUNT_NOT_FOUND));
+            debitBalance.setActualBalance(debitBalance.getAvailableBalance());
+            BigDecimal addBalance = new BigDecimal(finalizeMessageRequest.getAmount());
+            creditBalance.setActualBalance(creditBalance.getActualBalance().add(addBalance));
+            creditBalance.setAvailableBalance(creditBalance.getAvailableBalance().add(addBalance));
+            accountBalanceRepository.save(debitBalance);
+            accountBalanceRepository.save(creditBalance);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

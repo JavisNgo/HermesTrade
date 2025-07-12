@@ -43,14 +43,19 @@ public class Integration {
     Long ttl;
     Long version;
 
+    @Getter
+    String gsiPk;
+    @Getter
+    String gsiSk;
+
     @DynamoDbPartitionKey
     public String getPk() {
-        return pk == null ? "INTEGRATION#" + clientId : pk;
+        return pk == null ? "INTEGRATION#" + clientId + destinationClientId : pk;
     }
 
     @DynamoDbSortKey
     public String getSk() {
-        return sk == null ? "METADATA#" + clientId : sk;
+        return sk == null ? "METADATA#" + clientId + destinationClientId : sk;
     }
 
     @DynamoDbVersionAttribute
@@ -71,6 +76,17 @@ public class Integration {
                 integration.setAvailableBalance(String.valueOf(tradeRequest.getAmount()));
             }
         }
+        return integration;
+    }
+
+    public static Integration onCreationWithUniqueKey(TradeRequest tradeRequest, String externalRef) {
+        Integration integration = onCreation(tradeRequest);
+        integration.pk = "INTEGRATION#" + integration.getClientId() + integration.getDestinationClientId() + "_" + externalRef;
+        integration.sk = "METADATA#" + externalRef;
+
+        integration.gsiPk = "PAIR#" + integration.getClientId() + integration.getDestinationClientId();
+        integration.gsiSk = externalRef;
+
         return integration;
     }
 

@@ -15,12 +15,21 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TransferController {
     ITransferService transferService;
-    @PostMapping("/transfer")
-    public ResponseEntity<TransferResponse> transfer(
+    @PostMapping("/transfer/reserve")
+    public ResponseEntity<TransferResponse> reserve(
             @RequestHeader(name = "idempotency-key") String idempotencyKey,
             @RequestBody TradeRequest tradeRequest
     ) {
         TransferResponse result = transferService.initiateP2PTransaction(tradeRequest, idempotencyKey);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/transfer/finalize")
+    public ResponseEntity<TransferResponse> finalize(
+            @RequestHeader(name = "idempotency-key") String idempotencyKey,
+            @RequestBody TradeRequest tradeRequest
+    ) {
+        TransferResponse result = transferService.finalizeP2PTransaction(tradeRequest, idempotencyKey);
         return ResponseEntity.ok(result);
     }
 }
