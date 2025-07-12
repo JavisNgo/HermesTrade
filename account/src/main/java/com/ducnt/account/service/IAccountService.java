@@ -12,4 +12,5 @@ public interface IAccountService {
     AccountProfileResponse getAccountProfile(String clientId);
     void getAdvertisements();
     void reserveAccountBalance(String clientId, String balance);
+    void finalizeAccountBalance(String request);
 }

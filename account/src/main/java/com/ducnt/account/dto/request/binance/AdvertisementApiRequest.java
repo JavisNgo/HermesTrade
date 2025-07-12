@@ -14,7 +14,7 @@ import java.util.List;
 public class AdvertisementApiRequest {
     private String fiat = "VND";
     private Integer page = 1;
-    private Integer rows = 10;
+    private Integer rows = 4;
     private String tradeType = "BUY";
     private String asset = "USDT";
     private Boolean proMerchantAds = false;

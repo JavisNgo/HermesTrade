@@ -19,14 +19,17 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: group1
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
-      linger-ms: 10
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    admin:
+      properties:
+        partitions: 10
+        replication.factor: 2
+      auto-create: true
 kafka:
   topic:
-    name: account-balance-reserve
+    name: account-balance
