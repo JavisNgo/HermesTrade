@@ -7,11 +7,13 @@ import lombok.NoArgsConstructor;
 @Getter
 public enum DomainCode {
 
+    INTERNAL_SERVER_ERROR("Internal server error", "000"),
     SERVICE_UNAVAILABLE("Service Unavailable", "001"),
     SESSION_EXPIRED("Session Expired", "002"),
     UNEXPECTED_ERROR_CODE("Unexpected Error Code", "003"),
     DATABASE_ERROR("Database Error", "004"),
     INSUFFICIENT_BALANCE("Insufficient Balance", "005"),
+    PAYMENT_NOT_FOUND("Payment Not Found", "006"),
 
 
     ACCOUNT_NOT_FOUND("Account Not Found", "0601000"),
@@ -23,6 +25,7 @@ public enum DomainCode {
     ADDRESS_IS_REQUIRED("Address Is Required","0601006"),
     EMAIL_ALREADY_EXISTS("Email Already Exists", "0601007"),
     PASSWORD_INCORRECT("Password Incorrect", "0601008")
+
     ;
 
     private final String SERVICE_IDENTIFIER = "0604";

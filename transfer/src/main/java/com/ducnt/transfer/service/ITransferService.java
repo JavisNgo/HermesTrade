@@ -5,5 +5,5 @@ import com.ducnt.transfer.dto.response.TransferResponse;
 
 public interface ITransferService {
     TransferResponse initiateP2PTransaction(TradeRequest tradeRequest, String idempotencyKey);
-
+    TransferResponse finalizeP2PTransaction(TradeRequest tradeRequest, String idempotencyKey);
 }

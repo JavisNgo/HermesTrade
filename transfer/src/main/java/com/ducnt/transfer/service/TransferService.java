@@ -1,19 +1,21 @@
 package com.ducnt.transfer.service;
 
 import com.ducnt.transfer.clients.AccountClient;
+import com.ducnt.transfer.dto.request.FinalizeMessageRequest;
 import com.ducnt.transfer.dto.request.Instruction;
 import com.ducnt.transfer.dto.request.TradeRequest;
 import com.ducnt.transfer.dto.response.AccountProfileResponse;
 import com.ducnt.transfer.dto.response.ErrorResponse;
 import com.ducnt.transfer.dto.response.TransferResponse;
 import com.ducnt.transfer.enums.Action;
-import com.ducnt.transfer.enums.UnitRef;
+import com.ducnt.transfer.enums.ProcessStatus;
 import com.ducnt.transfer.exception.DomainCode;
 import com.ducnt.transfer.exception.DomainException;
 import com.ducnt.transfer.models.Integration;
 import com.ducnt.transfer.models.TransferOrder;
 import com.ducnt.transfer.models.Utility;
 import com.ducnt.transfer.utils.Util;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.AccessLevel;
@@ -32,6 +34,7 @@ import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedExce
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -72,8 +75,8 @@ public class TransferService implements ITransferService {
         }
 
         TransferOrder transferOrder = TransferOrder.onCreation(tradeRequest, externalRef);
-        transferOrder.setAction(String.valueOf(Action.REVERSE));
-        Integration integration = Integration.onCreation(tradeRequest);
+        transferOrder.setAction(String.valueOf(Action.RESERVE));
+        Integration integration = Integration.onCreationWithUniqueKey(tradeRequest, externalRef);
 
         Utility utility = new Utility();
         utility.setIdempotencyKey(idempotencyKey);
@@ -85,20 +88,69 @@ public class TransferService implements ITransferService {
 
         try {
             Expression expression = Expression.builder()
-                    .expression("attribute_not_exists(pk) and attribute_not_exists(sk)")
+                    .expression("attribute_not_exists(pk)")
                     .build();
-            utilityTable.putItem(r -> r.item(utility).conditionExpression(expression));
+            utilityTable.putItem(r ->
+                    r.item(utility).conditionExpression(expression));
             transferOrderTable.putItem(r ->
                     r.item(transferOrder).conditionExpression(expression));
-            integrationTable.putItem(r -> r.item(integration).conditionExpression(expression));
+            integrationTable.putItem(r ->
+                    r.item(integration).conditionExpression(expression));
         } catch (ConditionalCheckFailedException e) {
             throw new DomainException(DomainCode.DATABASE_ERROR, HttpStatus.BAD_REQUEST);
         }
 
-        kafkaTemplate.send(accountTopic, 1,
+        kafkaTemplate.send(accountTopic, 0,
                 reservationAccount.getClientId(), newAvailableBalance.toString());
 
-        return TransferResponse.onCreation(transferOrder);
+        return TransferResponse.onReservePaymentRef(transferOrder.getReservePaymentRef());
+    }
+
+    @Override
+    public TransferResponse finalizeP2PTransaction(TradeRequest tradeRequest, String idempotencyKey) {
+
+        if(tradeRequest.getPaymentRef().isEmpty()) {
+            throw new DomainException(DomainCode.PAYMENT_NOT_FOUND,HttpStatus.BAD_REQUEST);
+        }
+
+        TransferOrder transferOrder = new TransferOrder();
+        transferOrder.setExternalRef(tradeRequest.getPaymentRef().replace("PAY#", ""));
+        Integration integration = Integration.onCreationWithUniqueKey(tradeRequest, transferOrder.getExternalRef());
+
+        Instruction reservationAccount = tradeRequest.getInstructions().stream()
+                .filter(r -> r.getSide().equals("CREDIT"))
+                .findFirst()
+                .orElseThrow(() -> new DomainException(DomainCode.INSUFFICIENT_BALANCE,HttpStatus.BAD_REQUEST));
+
+        AccountProfileResponse finalizeAccountProfile = getAccountProfile(reservationAccount.getClientId());
+
+        if(finalizeAccountProfile == null) {
+            throw new DomainException(DomainCode.SERVICE_UNAVAILABLE,HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
+        TransferOrder transferOrderItem = transferOrderTable.getItem(transferOrder);
+        Integration integrationItem = integrationTable.getItem(integration);
+        if(transferOrderItem == null || integrationItem == null) {
+            throw new DomainException(DomainCode.PAYMENT_NOT_FOUND,HttpStatus.BAD_REQUEST);
+        }
+
+        transferOrderItem.setAction(String.valueOf(Action.FINALIZE));
+        transferOrderItem.setProcessStatus(String.valueOf(ProcessStatus.SUCCESS));
+        transferOrderItem.setFinalizePaymentRef("PAYMENT#" + UUID.randomUUID());
+
+        FinalizeMessageRequest messageRequest = FinalizeMessageRequest.onCreation(integrationItem);
+
+        try {
+            transferOrderTable.updateItem(transferOrderItem);
+            String message = objectMapper.writeValueAsString(messageRequest);
+            kafkaTemplate.send(accountTopic, 1, "FINALIZE", message);
+        } catch (ConditionalCheckFailedException e) {
+            throw new DomainException(DomainCode.PAYMENT_NOT_FOUND,HttpStatus.BAD_REQUEST);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return TransferResponse.onFinalizePaymentRef(transferOrderItem.getFinalizePaymentRef());
     }
 
     private AccountProfileResponse getAccountProfile(String accountId) {
