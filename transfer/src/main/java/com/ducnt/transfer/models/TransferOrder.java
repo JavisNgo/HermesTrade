@@ -34,8 +34,6 @@ public class TransferOrder {
     @Getter
     String requestType; // purpose
     @Getter
-    String updateDate;
-    @Getter
     String amount;
     String reservePaymentRef;
     @Getter
@@ -74,7 +72,6 @@ public class TransferOrder {
                 .requestType(request.getPurpose())
                 .amount(String.valueOf(request.getAmount()))
                 .createdAt(String.valueOf(LocalDate.now()))
-                .externalRef(externalRef)
                 .processStatus(String.valueOf(ProcessStatus.PENDING))
                 .paymentAction(String.valueOf(PaymentAction.TRANSFER))
                 .build();

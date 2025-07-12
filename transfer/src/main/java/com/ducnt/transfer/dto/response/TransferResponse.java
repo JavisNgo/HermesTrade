@@ -35,9 +35,14 @@ public class TransferResponse {
                 .build();
     }
 
-    public static TransferResponse onCreation(TransferOrder transferOrder) {
+    public static TransferResponse onReservePaymentRef(String reservePaymentRef) {
         return TransferResponse.builder()
-                .paymentRef(transferOrder.getReservePaymentRef())
+                .paymentRef(reservePaymentRef)
+                .build();
+    }
+    public  static TransferResponse onFinalizePaymentRef(String finalizePaymentRef) {
+        return TransferResponse.builder()
+                .paymentRef(finalizePaymentRef)
                 .build();
     }
 }
